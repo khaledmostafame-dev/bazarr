@@ -150,6 +150,7 @@ class SubsourceProvider(ProviderRetryMixin, Provider, ProviderSubtitleArchiveMix
         :rtype: Optional[int]
         """
         title_id = None
+        imdb_scoped = bool(imdb_id)
 
         if imdb_id:
             parameters = {
@@ -181,6 +182,7 @@ class SubsourceProvider(ProviderRetryMixin, Provider, ProviderSubtitleArchiveMix
         results_dict = results.json()['data']
 
         if imdb_id and not results_dict:
+            imdb_scoped = False
             logger.debug(f'No results for IMDb ID {imdb_id}. Falling back to text search for: {title}')
             
             parameters = {
@@ -234,7 +236,7 @@ class SubsourceProvider(ProviderRetryMixin, Provider, ProviderSubtitleArchiveMix
                 if matched:
                     break
             if matched:
-                if not self.video.year or self.video.year == int(result['releaseYear']):
+                if imdb_scoped or not self.video.year or self.video.year == int(result['releaseYear']):
                     title_id = result['movieId']
                     break
             else:
